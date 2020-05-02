@@ -5,21 +5,8 @@ tool
 enum SpawnType {
 	WORLDSPAWN = 0,
 	MERGE_WORLDSPAWN = 1,
-	ENTITY = 2
-}
-
-enum VisualBuildType {
-	NONE,
-	MATERIAL_MESHES,
-	ATLASED_MESHES
-}
-
-enum PhysicsBodyType {
-	NONE,
-	AREA,
-	STATIC_BODY,
-	KINEMATIC_BODY,
-	RIGID_BODY
+	ENTITY = 2,
+	GROUP = 3
 }
 
 enum CollisionShapeType {
@@ -30,23 +17,22 @@ enum CollisionShapeType {
 
 # Controls whether a given SolidClass is the worldspawn, is combined with the worldspawn,
 # or is spawned as its own free-standing entity
-export(String) var spawn = QodotUtil.CATEGORY_STRING
-export(SpawnType) var spawn_type = SpawnType.ENTITY
+export(String) var spawn : String = QodotUtil.CATEGORY_STRING
+export(SpawnType) var spawn_type : int = SpawnType.ENTITY
 
 # Controls how visuals are built for this SolidClass
-export(String) var visual_build = QodotUtil.CATEGORY_STRING
-export(VisualBuildType) var visual_build_type = VisualBuildType.MATERIAL_MESHES
+export(String) var visual_build : String = QodotUtil.CATEGORY_STRING
+export(bool) var build_visuals := true
 
 # Controls how collisions are built for this SolidClass
-export(String) var collision_build = QodotUtil.CATEGORY_STRING
-export(PhysicsBodyType) var physics_body_type = PhysicsBodyType.KINEMATIC_BODY
-export(CollisionShapeType) var collision_shape_type = CollisionShapeType.CONVEX
+export(String) var collision_build : String = QodotUtil.CATEGORY_STRING
+export(CollisionShapeType) var collision_shape_type : int = CollisionShapeType.CONVEX
 
 # The script file to associate with this SolidClass
 # On building the map, this will be attached to any brush entities created
 # via this classname
-export(String) var scripting = QodotUtil.CATEGORY_STRING
-export(Script) var script_class
+export(String) var scripting : String = QodotUtil.CATEGORY_STRING
+export(Script) var script_class : Script
 
-func _init():
+func _init() -> void:
 	prefix = "@SolidClass"

@@ -3,30 +3,53 @@ extends Resource
 
 var prefix: String = ""
 
-export(String) var class_options = QodotUtil.CATEGORY_STRING
+export(String) var class_options : String = QodotUtil.CATEGORY_STRING
+
+export(String) var classname := ""
+
+export(String) var description := ""
+
+export(bool) var qodot_internal := false
+
+export(Array, Resource) var base_classes := []
+
+export(Dictionary) var class_properties := {}
+
+export(Dictionary) var class_property_descriptions := {}
 
 export(Dictionary) var meta_properties := {
 	"size": AABB(Vector3(-8, -8, -8), Vector3(8, 8, 8)),
 	"color": Color(0.8, 0.8, 0.8)
 }
 
-export(Dictionary) var class_properties := {}
+export(String) var node_options : String = QodotUtil.CATEGORY_STRING
 
-export(Dictionary) var class_property_descriptions := {}
+export(String) var node_class := ""
 
-## A node used to define an entity in a QodotEntityDefinitionSet
-export(String) var classname
-
-# description for the entity def
-export var description = ""
+export(bool) var transient_node := false
 
 func build_def_text() -> String:
 	# Class prefix
-	var res = prefix
+	var res : String = prefix
 
-	# Class properties
-	for prop in meta_properties:
-		var value = meta_properties[prop]
+	# Meta properties
+	var base_str = ""
+	var meta_props = meta_properties.duplicate()
+
+	for base_class in base_classes:
+		if not 'classname' in base_class:
+			continue
+
+		base_str += base_class.classname
+
+		if base_class != base_classes.back():
+			base_str += ", "
+
+	if base_str != "":
+		meta_props['base'] = base_str
+
+	for prop in meta_props:
+		var value = meta_props[prop]
 		res += " " + prop + "("
 
 		if value is AABB:
@@ -57,6 +80,7 @@ func build_def_text() -> String:
 
 	res += "[" + QodotUtil.newline()
 
+	# Class properties
 	for prop in class_properties:
 		var value = class_properties[prop]
 
@@ -75,7 +99,18 @@ func build_def_text() -> String:
 			prop_val = "\"" + value + "\""
 		elif value is Vector3:
 			prop_type = "string"
-			prop_val = "\"%s %s %s\"" % [value.x, value.y, value.z]
+			prop_val = "\"%s %s %s\"" % [
+				value.x,
+				value.y,
+				value.z
+			]
+		elif value is Color:
+			prop_type = "color255"
+			prop_val = "\"%s %s %s\"" % [
+				value.r8,
+				value.g8,
+				value.b8
+			]
 		elif value is Dictionary:
 			prop_type = "choices"
 			prop_val = "[" + "\n"
@@ -89,6 +124,10 @@ func build_def_text() -> String:
 			for arr_val in value:
 				prop_val += "\t\t" + String(arr_val[1]) + " : \"" + String(arr_val[0]) + "\" : " + ("1" if arr_val[2] else "0") + "\n"
 			prop_val += "\t]"
+		elif value is NodePath:
+			prop_type = "target_destination"
+		elif value is Object:
+			prop_type = "target_source"
 
 		if(prop_val):
 			res += "\t"
